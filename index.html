@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2d5a27">
+<title>Lens Tarjimon</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Manrope:wght@400;500;700;800&display=swap');
+:root{
+  --paper:#fef9ef;--card:#fffef5;--ink:#1a2e18;--green:#2d5a27;--green2:#4a8c42;
+  --green-l:#e8f5e3;--orange:#c8693f;--orange-l:#fdf0ea;--line:#c8d4c4;
+  --sh:#1a2e18;--gray:#8a9688;--yellow:#fff3b0;--red:#d94f3d;
+  --font-head:'Caveat',cursive;--font-body:'Manrope',sans-serif;
+}
+[data-theme="dark"]{
+  --paper:#151c14;--card:#1e261d;--ink:#e0edd8;--green:#5a9e52;--green2:#72b86a;
+  --green-l:#1a2819;--orange:#e07a4d;--orange-l:#2a1a14;--line:#2d3d2b;
+  --sh:#0a0f09;--gray:#6a7a68;--yellow:#3a3310;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html,body{height:100%;font-family:var(--font-body);background:var(--paper);color:var(--ink);}
+/* Paper texture */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,0.03) 28px);pointer-events:none;z-index:0;}
+/* Sketch card */
+.sk{background:var(--card);border:2.5px solid var(--ink);border-radius:12px 14px 13px 11px/11px 13px 14px 12px;box-shadow:3px 3px 0 var(--sh);}
+.sk-sm{background:var(--card);border:2px solid var(--ink);border-radius:9px 11px 10px 8px/8px 10px 11px 9px;box-shadow:2px 2px 0 var(--sh);}
+/* Sketch button */
+.sk-btn{border:2px solid var(--ink);border-radius:8px 10px 9px 7px/7px 9px 10px 8px;box-shadow:2px 2px 0 var(--sh);font-family:var(--font-body);font-weight:700;cursor:pointer;transition:all 0.1s;background:var(--green-l);color:var(--ink);}
+.sk-btn:active{box-shadow:0 0 0 var(--sh);transform:translate(2px,2px);}
+.sk-btn.primary{background:var(--green);color:#fff;border-color:var(--sh);}
+.sk-btn.danger{background:var(--orange-l);color:var(--orange);}
+.sk-btn.yellow{background:var(--yellow);color:var(--ink);}
+/* Screens */
+.screen{display:none;flex-direction:column;width:100%;min-height:100vh;background:var(--paper);position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;z-index:10;transform:translateX(100%);transition:transform 0.3s cubic-bezier(.4,0,.2,1);}
+.screen.active{display:flex;transform:translateX(0);}
+.screen.back{transform:translateX(-30%);}
+/* Header */
+.hdr{background:var(--green);border-bottom:2.5px solid var(--sh);color:#fff;display:flex;align-items:center;padding:14px 16px;gap:12px;position:sticky;top:0;z-index:10;flex-shrink:0;}
+.hdr-back{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0;line-height:1;}
+.hdr-title{font-family:var(--font-head);font-size:20px;font-weight:700;flex:1;}
+.hdr-actions{display:flex;gap:8px;}
+.hdr-btn{background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-size:12px;font-weight:700;padding:6px 11px;border-radius:8px 10px 9px 7px/7px 9px 10px 8px;cursor:pointer;font-family:var(--font-body);}
+.hdr-btn:active{background:rgba(255,255,255,0.3);}
+.sbody{width:100%;max-width:480px;padding:16px;margin:0 auto;flex:1;}
+/* Splash */
+#splashScreen{background:var(--green);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+#splashScreen.active{display:flex;transform:none;}
+.splash-icon{font-size:72px;animation:splashPop 0.6s cubic-bezier(.4,0,.2,1) forwards;}
+@keyframes splashPop{0%{transform:scale(0);opacity:0;}70%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.splash-title{font-family:var(--font-head);font-size:40px;font-weight:700;color:#fff;opacity:0;animation:fadeIn 0.5s 0.4s forwards;}
+.splash-sub{font-size:14px;color:rgba(255,255,255,0.8);opacity:0;animation:fadeIn 0.5s 0.7s forwards;}
+@keyframes fadeIn{to{opacity:1;}}
+/* Onboarding */
+#onboardScreen{z-index:100;background:var(--paper);}
+#onboardScreen.active{display:flex;transform:none;}
+.ob-slides{display:flex;overflow:hidden;width:100%;}
+.ob-slide{min-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:16px;}
+.ob-emoji{font-size:80px;filter:drop-shadow(3px 3px 0 rgba(0,0,0,0.15));}
+.ob-title{font-family:var(--font-head);font-size:32px;font-weight:700;color:var(--green);}
+.ob-desc{font-size:15px;color:var(--gray);line-height:1.6;max-width:320px;}
+.ob-dots{display:flex;gap:8px;justify-content:center;}
+.ob-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--ink);background:transparent;transition:background 0.2s;}
+.ob-dot.active{background:var(--green);}
+.ob-nav{display:flex;gap:12px;width:100%;max-width:300px;padding:0 24px;}
+.ob-nav button{flex:1;padding:14px;font-size:15px;border-radius:10px 12px 11px 9px/9px 11px 12px 10px;}
+/* Home */
+#homeScreen.active{display:flex;transform:none;}
+.home-wrap{width:100%;max-width:460px;margin:0 auto;padding:16px 16px 80px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;}
+/* Brand */
+.brand{text-align:center;padding:8px 0;}
+.brand-title{font-family:var(--font-head);font-size:36px;font-weight:700;color:var(--green);line-height:1;}
+.brand-sub{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-top:4px;}
+/* WOTD */
+.wotd{padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.wotd-badge{font-size:28px;flex-shrink:0;}
+.wotd-label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
+.wotd-word{font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--green);}
+.wotd-trans{font-size:13px;color:var(--orange);}
+/* Nav tabs */
+.nav-row{display:flex;gap:8px;}
+.nav-tab{flex:1;padding:10px 6px;border:2px solid var(--ink);border-radius:8px 10px 9px 7px/7px 9px 10px 8px;font-family:var(--font-body);font-weight:700;font-size:12px;cursor:pointer;background:var(--card);color:var(--ink);text-align:center;box-shadow:2px 2px 0 var(--sh);}
+.nav-tab.active{background:var(--green);color:#fff;border-color:var(--sh);}
+.nav-tab:active{box-shadow:0 0 0;transform:translate(2px,2px);}
+/* Lang panel */
+.lang-wrap{padding:12px;}
+.lang-selects{display:flex;align-items:center;gap:8px;}
+.lang-sel{flex:1;padding:10px 8px;border:2px solid var(--ink);border-radius:8px 10px 9px 7px/7px 9px 10px 8px;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--green);background:var(--green-l);outline:none;-webkit-appearance:none;text-align:center;box-shadow:2px 2px 0 var(--sh);}
+.swap-btn{flex-shrink:0;background:var(--orange);border:2px solid var(--sh);color:#fff;width:38px;height:38px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 var(--sh);}
+.swap-btn:active{box-shadow:0 0 0;transform:translate(2px,2px);}
+/* Capture */
+.capture-row{display:flex;gap:10px;}
+.cap-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 10px;cursor:pointer;border:2.5px dashed var(--ink);background:var(--card);}
+.cap-btn:active{background:var(--green-l);}
+.cap-btn span.ic{font-size:26px;}
+.cap-btn span.lb{font-weight:700;font-size:13px;}
+input[type=file]{display:none;}
+/* Text panel */
+.text-label{padding:8px 14px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--orange);font-weight:700;border-bottom:2px dashed var(--line);}
+#pasteText{width:100%;border:none;resize:none;font-family:var(--font-body);font-size:15px;padding:12px 14px;outline:none;background:transparent;color:var(--ink);height:80px;}
+.text-actions{display:flex;align-items:center;gap:8px;padding:8px 12px 12px;flex-wrap:wrap;}
+.text-actions button{padding:8px 12px;font-size:12px;}
+.mic-btn{width:32px;height:32px;border-radius:50%;border:2px solid var(--ink);background:var(--orange-l);color:var(--orange);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:1px 1px 0 var(--sh);flex-shrink:0;}
+.mic-btn.on{background:var(--orange);color:#fff;animation:pulse 1s infinite;}
+@keyframes pulse{50%{transform:scale(1.1);}}
+/* Progress */
+.prog-wrap{display:none;padding:0 2px;}
+.prog-wrap.show{display:block;}
+.prog-track{height:6px;background:var(--line);border-radius:6px;overflow:hidden;border:1.5px solid var(--ink);}
+.prog-fill{height:100%;width:0%;background:var(--green);transition:width 0.2s;}
+/* List panel */
+.list-panel{display:none;flex-direction:column;overflow:hidden;}
+.list-panel.show{display:flex;}
+.list-hdr{padding:12px 14px;background:var(--green);color:#fff;display:flex;align-items:center;gap:8px;}
+.list-hdr-title{font-family:var(--font-head);font-size:18px;font-weight:700;flex:1;}
+.save-btn2{background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.5);color:#fff;font-size:12px;font-weight:700;padding:6px 10px;border-radius:7px;cursor:pointer;font-family:var(--font-body);}
+.list-count{font-size:12px;opacity:0.8;font-weight:700;}
+#wordList{max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+/* Word row */
+.wr-wrap{border-bottom:1.5px solid var(--line);}
+.wr-wrap:last-child{border-bottom:none;}
+.wr{display:flex;align-items:center;padding:11px 12px;gap:7px;}
+.wr-pair{display:flex;align-items:flex-start;gap:7px;flex:1;overflow:hidden;}
+.wr-orig{font-weight:700;font-size:15px;flex-shrink:0;max-width:38%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wr-dash{color:var(--line);flex-shrink:0;}
+.wr-trans{font-size:14px;color:var(--green2);word-break:break-word;line-height:1.4;}
+.wr-trans.loading{color:var(--gray);font-style:italic;}
+.wr-level{font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;flex-shrink:0;border:1.5px solid;}
+.lvl-A1{background:#e8f5e3;color:#2d5a27;border-color:#2d5a27;}
+.lvl-A2{background:#e8f5e3;color:#2d5a27;border-color:#2d5a27;}
+.lvl-B1{background:#fff3b0;color:#7a6200;border-color:#c8a800;}
+.lvl-B2{background:#fdf0ea;color:#c8693f;border-color:#c8693f;}
+.lvl-C1,.lvl-C2{background:#fde8e8;color:#d94f3d;border-color:#d94f3d;}
+.wr-learned{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:transparent;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;}
+.wr-learned.done{background:var(--green);border-color:var(--green);color:#fff;}
+.ic-btn{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--ink);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--card);}
+.ic-btn.info{background:var(--green-l);color:var(--green);}
+.ic-btn.tts{background:#e8e4f7;color:#6b5fb5;}
+.ic-btn.copy{background:var(--green-l);color:var(--green);}
+.ic-btn.copy.ok{background:var(--green);color:#fff;}
+.ic-btn.del{background:var(--orange-l);color:var(--orange);}
+/* Info box */
+.info-box{display:none;padding:8px 12px 10px;border-top:1.5px dashed var(--line);background:var(--green-l);}
+.info-box.show{display:block;}
+.pos-tag{display:inline-block;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin:0 3px 4px 0;border:1px solid var(--sh);}
+.def-row{font-size:12px;color:var(--ink);margin-bottom:3px;line-height:1.4;padding-left:10px;border-left:2px solid var(--green2);}
+.syn-row{font-size:11px;color:var(--gray);margin-top:5px;padding-left:10px;}
+.ex-row{font-size:11.5px;color:var(--orange);font-style:italic;margin:3px 0 0 10px;}
+/* Preview */
+.preview-img{width:100%;max-height:180px;object-fit:cover;display:block;}
+/* Saved screen */
+.search-wrap{display:flex;align-items:center;background:var(--card);border:2px solid var(--ink);border-radius:10px 12px 11px 9px/9px 11px 12px 10px;padding:0 12px;box-shadow:2px 2px 0 var(--sh);margin-bottom:12px;}
+.search-wrap input{flex:1;border:none;outline:none;padding:11px 0;font-family:var(--font-body);font-size:14px;background:transparent;color:var(--ink);}
+.si{background:var(--card);border-radius:11px 13px 12px 10px/10px 12px 13px 11px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--sh);margin-bottom:10px;overflow:hidden;}
+.si-head{padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.si-info{flex:1;overflow:hidden;}
+.si-name{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.si-meta{font-size:12px;color:var(--gray);margin-top:2px;}
+/* Detail */
+.dw{border-bottom:1.5px solid var(--line);}
+.dw:last-child{border-bottom:none;}
+.dw-row{display:flex;align-items:center;gap:7px;padding:12px 12px;}
+.dw-orig{font-weight:700;font-size:15px;flex-shrink:0;max-width:36%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dw-dash{color:var(--line);flex-shrink:0;}
+.dw-trans{font-size:14px;color:var(--green2);flex:1;word-break:break-word;}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-card{padding:16px;text-align:center;}
+.stat-n{font-family:var(--font-head);font-size:38px;font-weight:700;color:var(--green);}
+.stat-l{font-size:12px;color:var(--gray);margin-top:2px;}
+/* Flashcard */
+.fc-wrap{display:flex;flex-direction:column;align-items:center;padding:20px 16px;gap:16px;}
+.fc{width:100%;max-width:340px;height:200px;perspective:1000px;cursor:pointer;}
+.fc-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.5s;}
+.fc.flipped .fc-inner{transform:rotateY(180deg);}
+.fc-f,.fc-b{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:16px 18px 17px 15px/15px 17px 18px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;border:2.5px solid var(--sh);box-shadow:4px 4px 0 var(--sh);}
+.fc-f{background:var(--green);color:#fff;}
+.fc-b{background:var(--orange);color:#fff;transform:rotateY(180deg);}
+.fc-word{font-family:var(--font-head);font-size:32px;font-weight:700;}
+.fc-hint{font-size:12px;opacity:0.75;margin-top:8px;}
+.fc-nav{display:flex;gap:12px;align-items:center;}
+.fc-btn{padding:10px 22px;font-size:14px;}
+.fc-prog{font-size:13px;color:var(--gray);font-weight:700;}
+/* Quiz */
+.qz-q{padding:24px 20px;text-align:center;border-radius:16px 18px 17px 15px/15px 17px 18px 16px;border:2.5px solid var(--sh);box-shadow:4px 4px 0 var(--sh);background:var(--green);color:#fff;margin-bottom:20px;}
+.qz-word{font-family:var(--font-head);font-size:30px;font-weight:700;margin-bottom:6px;}
+.qz-sub{font-size:12px;opacity:0.75;}
+.qz-opts{display:flex;flex-direction:column;gap:10px;}
+.qz-opt{background:var(--card);border:2px solid var(--ink);border-radius:10px 12px 11px 9px/9px 11px 12px 10px;padding:14px 16px;font-size:15px;font-weight:600;cursor:pointer;text-align:left;font-family:var(--font-body);box-shadow:2px 2px 0 var(--sh);transition:all 0.15s;color:var(--ink);}
+.qz-opt.ok{border-color:var(--green);background:var(--green-l);box-shadow:2px 2px 0 var(--green);}
+.qz-opt.ng{border-color:var(--red);background:#fde8e8;box-shadow:2px 2px 0 var(--red);}
+.qz-score-wrap{text-align:center;padding:30px 0;}
+.qz-score-n{font-family:var(--font-head);font-size:60px;font-weight:700;color:var(--green);}
+.qz-restart{padding:12px 30px;font-size:15px;margin-top:16px;}
+/* History */
+.hist-item{padding:13px 14px;border-bottom:1.5px dashed var(--line);cursor:pointer;}
+.hist-item:last-child{border-bottom:none;}
+.hist-item:active{background:var(--green-l);}
+.hist-text{font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hist-meta{font-size:11px;color:var(--gray);margin-top:2px;}
+/* Settings */
+.sett-row{display:flex;align-items:center;justify-content:space-between;padding:16px 4px;border-bottom:1.5px dashed var(--line);}
+.sett-row:last-child{border-bottom:none;}
+.sett-label{font-weight:700;font-size:14px;}
+.sett-sub{font-size:12px;color:var(--gray);margin-top:2px;}
+.toggle{width:48px;height:26px;border-radius:13px;border:2px solid var(--ink);background:var(--line);cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;border:1.5px solid var(--ink);top:2px;left:2px;transition:left 0.2s;}
+.toggle.on::after{left:24px;}
+/* Modal */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+.modal-ov.show{display:flex;}
+.modal-box{padding:20px;width:100%;max-width:340px;}
+.modal-title{font-family:var(--font-head);font-size:22px;font-weight:700;margin-bottom:14px;color:var(--ink);}
+.modal-inp{width:100%;padding:11px 14px;border:2px solid var(--ink);border-radius:10px 12px 11px 9px/9px 11px 12px 10px;font-family:var(--font-body);font-size:14px;outline:none;margin-bottom:14px;background:var(--card);color:var(--ink);}
+.modal-acts{display:flex;gap:10px;justify-content:flex-end;}
+.modal-acts button{padding:10px 18px;font-size:13px;}
+/* Toast */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;z-index:9999;white-space:nowrap;box-shadow:3px 3px 0 var(--sh);pointer-events:none;font-family:var(--font-body);opacity:0;transition:opacity 0.3s;display:none;border:2px solid var(--sh);}
+/* Status */
+.status-txt{text-align:center;font-size:12px;color:var(--gray);min-height:16px;}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SPLASH -->
+<div class="screen" id="splashScreen">
+  <div class="splash-icon">✏️</div>
+  <div class="splash-title">Lens Tarjimon</div>
+  <div class="splash-sub">So'zlarni o'rganish yanada oson</div>
+  <div style="position:absolute;bottom:32px;font-size:12px;color:rgba(255,255,255,0.55);font-family:'Manrope',sans-serif;">by Usmonjonov</div>
+</div>
+
+<!-- ONBOARD -->
+<div class="screen" id="onboardScreen">
+  <div class="ob-slides" id="obSlides">
+    <div class="ob-slide">
+      <div class="ob-emoji">📸</div>
+      <div class="ob-title">Rasm oling!</div>
+      <div class="ob-desc">Kamera yoki galereyadan rasm tanlang. Ilova rasmdan barcha so'zlarni avtomatik topib tarjima qiladi.</div>
+    </div>
+    <div class="ob-slide">
+      <div class="ob-emoji">🧠</div>
+      <div class="ob-title">O'rganing!</div>
+      <div class="ob-desc">Tarjima qilingan so'zlarni saqlang. Flashcard va test orqali mustahkamlang. Har kuni yangi so'z o'rganing!</div>
+    </div>
+    <div class="ob-slide">
+      <div class="ob-emoji">🏆</div>
+      <div class="ob-title">Yutib chiqing!</div>
+      <div class="ob-desc">Statistikani kuzating. So'zlarni do'stlaringiz bilan ulashing. Til o'rganish hech qachon bu qadar qiziqarli bo'lmagan!</div>
+    </div>
+  </div>
+  <div style="padding:0 24px 32px;display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;">
+    <div class="ob-dots" id="obDots">
+      <div class="ob-dot active"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+    </div>
+    <div class="ob-nav">
+      <button class="sk-btn" id="obSkip">O'tkazib yuborish</button>
+      <button class="sk-btn primary" id="obNext">Keyingi →</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="homeScreen">
+  <div class="home-wrap">
+    <div class="brand">
+      <div class="brand-title">✏️ Lens Tarjimon</div>
+      <div class="brand-sub">Rasmdagi so'zlarni tarjima qiling</div>
+      <div style="font-size:11px;color:var(--gray);margin-top:3px;font-style:italic;">by Usmonjonov</div>
+    </div>
+
+    <div class="sk wotd" id="wotdCard">
+      <div class="wotd-badge">🌟</div>
+      <div>
+        <div class="wotd-label">Kunning so'zi</div>
+        <div class="wotd-word" id="wotdWord">—</div>
+        <div class="wotd-trans" id="wotdTrans">—</div>
+      </div>
+      <button class="ic-btn tts" id="wotdTts" style="margin-left:auto;">🔊</button>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-tab" id="navSaved">🗂️ Saqlangan</button>
+      <button class="nav-tab" id="navStats">📊 Statistika</button>
+      <button class="nav-tab" id="navHistory">🕐 Tarix</button>
+      <button class="nav-tab" id="navSettings">⚙️ Sozlama</button>
+    </div>
+
+    <div class="sk lang-wrap">
+      <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--orange);font-weight:700;margin-bottom:10px;">📍 Tarjima yo'nalishi</div>
+      <div class="lang-selects">
+        <select class="lang-sel" id="fromLang">
+          <option value="en">🇬🇧 Ingliz</option>
+          <option value="ru">🇷🇺 Rus</option>
+          <option value="de">🇩🇪 Nemis</option>
+          <option value="fr">🇫🇷 Fransuz</option>
+          <option value="es">🇪🇸 Ispan</option>
+          <option value="ko">🇰🇷 Koreys</option>
+          <option value="tr">🇹🇷 Turk</option>
+          <option value="ar">🇸🇦 Arab</option>
+          <option value="zh-CN">🇨🇳 Xitoy</option>
+          <option value="uz">🇺🇿 O'zbek</option>
+        </select>
+        <button class="swap-btn" id="swapBtn">⇄</button>
+        <select class="lang-sel" id="toLang">
+          <option value="uz">🇺🇿 O'zbek</option>
+          <option value="en">🇬🇧 Ingliz</option>
+          <option value="ru">🇷🇺 Rus</option>
+          <option value="de">🇩🇪 Nemis</option>
+          <option value="fr">🇫🇷 Fransuz</option>
+          <option value="es">🇪🇸 Ispan</option>
+          <option value="ko">🇰🇷 Koreys</option>
+          <option value="tr">🇹🇷 Turk</option>
+          <option value="ar">🇸🇦 Arab</option>
+          <option value="zh-CN">🇨🇳 Xitoy</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="capture-row">
+      <label class="sk cap-btn" for="camIn"><span class="ic">📷</span><span class="lb">Rasmga olish</span></label>
+      <label class="sk cap-btn" for="galIn"><span class="ic">🖼️</span><span class="lb">Galereyadan</span></label>
+    </div>
+    <input type="file" id="camIn" accept="image/*" capture="environment">
+    <input type="file" id="galIn" accept="image/*">
+
+    <div id="previewWrap" style="display:none;border-radius:12px;overflow:hidden;border:2px solid var(--ink);">
+      <img id="previewImg" class="preview-img" alt="">
+    </div>
+
+    <div class="sk">
+      <div class="text-label">✍️ Yoki matn kiriting</div>
+      <textarea id="pasteText" placeholder="Matnni yozing yoki joylashtiring..."></textarea>
+      <div class="text-actions">
+        <button class="sk-btn danger" id="clearBtn" style="font-size:12px;padding:7px 10px;">🗑 Tozala</button>
+        <button class="sk-btn" id="stripBtn" style="font-size:12px;padding:7px 10px;">✂️ Qo'shimchasiz</button>
+        <button class="sk-btn" id="filterBtn" style="font-size:12px;padding:7px 10px;">🔄 Filtr</button>
+        <button class="mic-btn" id="micBtn">🎤</button>
+        <button class="sk-btn primary" id="transBtn" style="padding:8px 14px;font-size:13px;margin-left:auto;">Tarjima →</button>
+      </div>
+    </div>
+
+    <div class="status-txt" id="statusTxt"></div>
+    <div class="prog-wrap" id="progWrap"><div class="prog-track"><div class="prog-fill" id="progFill"></div></div></div>
+
+    <div class="sk list-panel" id="listPanel">
+      <div class="list-hdr">
+        <span class="list-hdr-title">📋 Topilgan so'zlar</span>
+        <button class="save-btn2" id="saveBtn">🗂️ Saqlash</button>
+        <span class="list-count" id="wCount">0 ta</span>
+      </div>
+      <div id="wordList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SAVED -->
+<div class="screen" id="savedScreen">
+  <div class="hdr">
+    <button class="hdr-back" id="savedBack">←</button>
+    <span class="hdr-title">🗂️ Saqlangan</span>
+  </div>
+  <div class="sbody">
+    <div class="search-wrap"><span style="color:var(--gray);font-size:16px;">🔍</span><input id="searchIn" placeholder="Qidirish..." type="text"></div>
+    <div id="savedList"></div>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div class="screen" id="detailScreen">
+  <div class="hdr">
+    <button class="hdr-back" id="detailBack">←</button>
+    <span class="hdr-title" id="detailTitle">To'plam</span>
+    <div class="hdr-actions">
+      <button class="hdr-btn" id="fcStartBtn">🃏</button>
+      <button class="hdr-btn" id="qzStartBtn">🧠</button>
+      <button class="hdr-btn" id="shareBtn">📤</button>
+    </div>
+  </div>
+  <div class="sbody">
+    <div id="detailMeta" style="font-size:12px;color:var(--gray);margin-bottom:12px;"></div>
+    <div class="sk" id="detailWords" style="overflow:hidden;"></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="screen" id="statsScreen">
+  <div class="hdr"><button class="hdr-back" id="statsBack">←</button><span class="hdr-title">📊 Statistika</span></div>
+  <div class="sbody" id="statsBody"></div>
+</div>
+
+<!-- HISTORY -->
+<div class="screen" id="histScreen">
+  <div class="hdr"><button class="hdr-back" id="histBack">←</button><span class="hdr-title">🕐 Tarix</span>
+    <div class="hdr-actions"><button class="hdr-btn" id="histClear">Tozala</button></div>
+  </div>
+  <div class="sbody">
+    <div class="sk" id="histList" style="overflow:hidden;"></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="settScreen">
+  <div class="hdr"><button class="hdr-back" id="settBack">←</button><span class="hdr-title">⚙️ Sozlamalar</span></div>
+  <div class="sbody">
+    <div class="sk" style="padding:8px 16px;">
+      <div class="sett-row">
+        <div><div class="sett-label">🌙 Tungi rejim</div><div class="sett-sub">Qorong'u dizayn</div></div>
+        <div class="toggle" id="darkToggle"></div>
+      </div>
+      <div class="sett-row">
+        <div><div class="sett-label">🔄 Takroriy so'z filtri</div><div class="sett-sub">Avval tarjima qilingan so'zlarni o'tkazib yuborish</div></div>
+        <div class="toggle" id="filterToggle"></div>
+      </div>
+      <div class="sett-row">
+        <div><div class="sett-label">⚡ Avto-tarjima</div><div class="sett-sub">Matn kiritilganda avtomatik tarjima qilsin</div></div>
+        <div class="toggle" id="autoToggle"></div>
+      </div>
+      <div class="sett-row">
+        <div><div class="sett-label">✂️ Qo'shimchasiz rejim</div><div class="sett-sub">So'z oxiridagi qo'shimchalarni olib tarjima qilish</div></div>
+        <div class="toggle" id="stripToggle"></div>
+      </div>
+      <div class="sett-row">
+        <div><div class="sett-label">📳 Tebranish</div><div class="sett-sub">Tugma bosilganda tebranish</div></div>
+        <div class="toggle" id="hapticToggle"></div>
+      </div>
+    </div>
+    <div style="margin-top:20px;text-align:center;color:var(--gray);font-size:12px;">✏️ Lens Tarjimon v2.0</div>
+  </div>
+</div>
+
+<!-- FLASHCARD -->
+<div class="screen" id="fcScreen">
+  <div class="hdr"><button class="hdr-back" id="fcBack">←</button><span class="hdr-title">🃏 Kartalar</span>
+    <div class="hdr-actions"><span id="fcProg" style="font-size:13px;font-weight:700;"></span></div>
+  </div>
+  <div class="fc-wrap">
+    <div class="fc" id="fcCard">
+      <div class="fc-inner">
+        <div class="fc-f"><div class="fc-word" id="fcFront"></div><div class="fc-hint">Bosib tarjimasini ko'ring 👆</div></div>
+        <div class="fc-b"><div class="fc-word" id="fcBack"></div><div class="fc-hint">Orqaga aylantirish uchun bosing</div></div>
+      </div>
+    </div>
+    <div style="color:var(--gray);font-size:13px;">Kartani bosib aylantiring</div>
+    <div class="fc-nav">
+      <button class="sk-btn fc-btn" id="fcPrev">← Oldingi</button>
+      <button class="sk-btn primary fc-btn" id="fcNext">Keyingi →</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="qzScreen">
+  <div class="hdr"><button class="hdr-back" id="qzBack">←</button><span class="hdr-title">🧠 Test</span>
+    <div class="hdr-actions"><span id="qzHdr" style="font-size:13px;font-weight:700;"></span></div>
+  </div>
+  <div class="sbody" id="qzBody" style="padding-top:20px;"></div>
+</div>
+
+<!-- SAVE MODAL -->
+<div class="modal-ov" id="saveModal">
+  <div class="sk modal-box">
+    <div class="modal-title">📁 To'plamga nom bering</div>
+    <input type="text" class="modal-inp" id="saveNameIn" placeholder="masalan: 5-dars so'zlari">
+    <div class="modal-acts">
+      <button class="sk-btn" id="saveCancelBtn" style="padding:9px 16px;font-size:13px;">Bekor</button>
+      <button class="sk-btn primary" id="saveConfBtn" style="padding:9px 16px;font-size:13px;">✅ Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
+<script>
+// ===== STATE =====
+const S={
+  dark:false,filter:false,auto:false,strip:false,haptic:true,
+  seenWords:new Set(),currentItem:null,
+  fcWords:[],fcIdx:0,
+  qzWords:[],qzIdx:0,qzScore:0,qzDone:false,
+};
+
+// ===== WOTD =====
+const WOTD=[
+  {w:'apple',t:'olma',l:'A1'},{w:'happy',t:'baxtli',l:'A1'},{w:'friend',t:"do'st",l:'A1'},
+  {w:'beautiful',t:'chiroyli',l:'A2'},{w:'journey',t:'sayohat',l:'A2'},{w:'success',t:'muvaffaqiyat',l:'B1'},
+  {w:'ambiguous',t:'noaniq',l:'B2'},{w:'diligent',t:'mehnatsevar',l:'B1'},{w:'grateful',t:'minnatdor',l:'B1'},
+  {w:'eloquent',t:"notiq, so'zamol",l:'B2'},{w:'resilient',t:'chidamli',l:'B2'},{w:'serendipity',t:'tasodifiy baxt',l:'C1'},
+  {w:'ephemeral',t:'o\'tkinchi',l:'C1'},{w:'meticulous',t:'ehtiyotkor',l:'C1'},{w:'perseverance',t:'qat\'iyat',l:'B2'},
+  {w:'empathy',t:'hamdardlik',l:'B2'},{w:'innovative',t:'innovatsion',l:'B1'},{w:'collaborate',t:'hamkorlik qilish',l:'B1'},
+  {w:'pragmatic',t:'amaliy',l:'C1'},{w:'curious',t:'qiziquvchan',l:'A2'},{w:'courage',t:'jasurlik',l:'A2'},
+  {w:'humble',t:'kamtar',l:'B1'},{w:'vibrant',t:'jonli, faol',l:'B2'},{w:'tranquil',t:'tinch, sokin',l:'B2'},
+  {w:'benevolent',t:'yaxshilik xohlovchi',l:'C1'},{w:'wisdom',t:'donolik',l:'B1'},{w:'adventure',t:'sarguzasht',l:'A2'},
+  {w:'inspire',t:'ilhomlantirmoq',l:'B1'},{w:'harmony',t:'uyg\'unlik',l:'B1'},{w:'flourish',t:'gullab-yashnash',l:'C1'},
+];
+
+// ===== UTILS =====
+const $=id=>document.getElementById(id);
+let _toast;
+function showToast(msg,dur=2200){
+  const el=$('toast');el.style.display='block';el.textContent=msg;el.style.opacity='1';
+  clearTimeout(_toast);_toast=setTimeout(()=>el.style.opacity='0',dur);
+}
+function haptic(d=20){if(S.haptic&&navigator.vibrate)navigator.vibrate(d);}
+function lset(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function lget(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function ldel(k){try{localStorage.removeItem(k);}catch(e){}}
+function lkeys(p){const r=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(p))r.push(k);}}catch(e){}return r;}
+
+// Screen nav
+function show(id,back=false){
+  const s=$(id);
+  document.querySelectorAll('.screen.active').forEach(x=>{if(x.id!==id){x.classList.remove('active');if(back)x.classList.add('back');}});
+  setTimeout(()=>document.querySelectorAll('.screen.back').forEach(x=>x.classList.remove('back')),300);
+  s.style.transform=back?'translateX(-100%)':'translateX(100%)';
+  s.style.display='flex';
+  setTimeout(()=>{s.style.transform='translateX(0)';s.classList.add('active');},10);
+}
+function hide(id){
+  const s=$(id);
+  s.style.transform='translateX(100%)';
+  setTimeout(()=>{s.style.transform='';s.classList.remove('active');s.style.display='';},300);
+}
+function mkBtn(cls,txt){const b=document.createElement('button');b.className=cls;b.textContent=txt;return b;}
+function copyText(t){navigator.clipboard.writeText(t).catch(()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');document.body.removeChild(x);});}
+
+// ===== SETTINGS LOAD =====
+function loadSettings(){
+  const sv=lget('settings');
+  if(sv)try{Object.assign(S,JSON.parse(sv));}catch(e){}
+  applyDark();
+  ['dark','filter','auto','strip','haptic'].forEach(k=>{
+    const el=$(k+'Toggle');
+    if(el){if(S[k])el.classList.add('on');else el.classList.remove('on');}
+  });
+  // strip btn sync
+  $('stripBtn').classList.toggle('sk-btn',true);
+  if(S.strip)$('stripBtn').style.background='var(--orange)';
+  if(S.filter)$('filterBtn').style.background='var(--orange)';
+}
+function saveSettings(){lset('settings',JSON.stringify({dark:S.dark,filter:S.filter,auto:S.auto,strip:S.strip,haptic:S.haptic}));}
+function applyDark(){document.documentElement.setAttribute('data-theme',S.dark?'dark':'light');}
+
+// Toggle helper
+function bindToggle(id,key,cb){
+  $(id).addEventListener('click',()=>{
+    S[key]=!S[key];
+    $(id).classList.toggle('on',S[key]);
+    saveSettings();
+    if(cb)cb(S[key]);
+    haptic();
+  });
+}
+
+// ===== LANGUAGE =====
+function getFrom(){return $('fromLang').value;}
+function getTo(){return $('toLang').value;}
+$('swapBtn').addEventListener('click',()=>{
+  const t=getFrom();$('fromLang').value=getTo();
+  const opts=[...$('toLang').options].map(o=>o.value);
+  $('toLang').value=opts.includes(t)?t:'uz';
+  haptic();
+});
+
+// ===== STRIP =====
+function stripSuf(w){
+  if(!S.strip)return w;
+  const sufs=['nesses','ments','tions','ations','ness','ment','tion','ation','ings','edly','ing','ed','er','est','ly','ful','less','able','ible','ous','ive','al','ied','ies','s'];
+  const lw=w.toLowerCase();
+  for(const s of sufs)if(lw.endsWith(s)&&lw.length>s.length+2)return lw.slice(0,lw.length-s.length);
+  return lw;
+}
+$('stripBtn').addEventListener('click',()=>{
+  S.strip=!S.strip;
+  $('stripBtn').style.background=S.strip?'var(--orange)':'';
+  $('stripBtn').style.color=S.strip?'#fff':'';
+  showToast(S.strip?'✂️ Qo\'shimchasiz rejim yoqildi':'Oddiy rejim');
+  saveSettings();haptic();
+});
+$('filterBtn').addEventListener('click',()=>{
+  S.filter=!S.filter;
+  $('filterBtn').style.background=S.filter?'var(--orange)':'';
+  $('filterBtn').style.color=S.filter?'#fff':'';
+  showToast(S.filter?'🔄 Filtr yoqildi':'Filtr o\'chirildi');
+  $('filterToggle').classList.toggle('on',S.filter);
+  saveSettings();haptic();
+});
+
+// ===== MIC =====
+let recog=null;
+if('webkitSpeechRecognition'in window||'SpeechRecognition'in window){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog=new SR();recog.interimResults=false;
+  recog.onresult=e=>{
+    const t=e.results[0][0].transcript;
+    $('pasteText').value=($('pasteText').value+' '+t).trim();
+    showToast('🎤 Matn qo\'shildi');
+    if(S.auto)debounceTrans();
+  };
+  recog.onend=()=>$('micBtn').classList.remove('on');
+  $('micBtn').addEventListener('click',()=>{
+    if($('micBtn').classList.contains('on')){recog.stop();}
+    else{recog.lang=getFrom()==='en'?'en-US':getFrom();recog.start();$('micBtn').classList.add('on');}
+    haptic();
+  });
+}else{$('micBtn').style.display='none';}
+
+// ===== TTS =====
+let _voices=[];
+function loadV(){_voices=speechSynthesis.getVoices();}
+loadV();if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=loadV;
+function speak(w,lang){
+  if(!window.speechSynthesis)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(w);
+  u.lang=lang||getFrom();u.rate=0.9;
+  const v=_voices.find(x=>x.lang.startsWith(u.lang));
+  if(v)u.voice=v;
+  setTimeout(()=>speechSynthesis.speak(u),100);
+}
+
+// ===== AUTO-TRANSLATE =====
+let _atTimer;
+function debounceTrans(){clearTimeout(_atTimer);_atTimer=setTimeout(()=>{const t=$('pasteText').value.trim();if(t.length>1)processText(t);},600);}
+$('pasteText').addEventListener('input',()=>{if(S.auto)debounceTrans();saveHistory();});
+$('transBtn').addEventListener('click',()=>{haptic();const t=$('pasteText').value.trim();if(!t){showToast('⚠️ Avval matn kiriting');return;}processText(t);});
+$('clearBtn').addEventListener('click',()=>{$('pasteText').value='';haptic();$('wordList').innerHTML='';$('listPanel').classList.remove('show');});
+
+// ===== HISTORY =====
+let _histTimer;
+function saveHistory(){
+  clearTimeout(_histTimer);
+  _histTimer=setTimeout(()=>{
+    const t=$('pasteText').value.trim();
+    if(!t||t.length<3)return;
+    const h=JSON.parse(lget('history')||'[]');
+    if(h[0]===t)return;
+    h.unshift(t);h.splice(20);
+    lset('history',JSON.stringify(h));
+  },2000);
+}
+
+// ===== CAMERA/OCR =====
+$('camIn').addEventListener('change',e=>handleFile(e.target.files[0]));
+$('galIn').addEventListener('change',e=>handleFile(e.target.files[0]));
+function handleFile(f){
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    $('previewImg').src=ev.target.result;
+    $('previewWrap').style.display='block';
+    runOCR(ev.target.result);
+  };
+  r.readAsDataURL(f);
+}
+const OCR_LANGS={'en':'eng','ru':'rus','de':'deu','fr':'fra','es':'spa','ko':'kor','tr':'tur','ar':'ara','zh-CN':'chi_sim','uz':'uzb'};
+async function runOCR(src){
+  $('wordList').innerHTML='';$('listPanel').classList.remove('show');
+  $('progFill').style.width='0%';$('statusTxt').textContent='';
+  $('progWrap').classList.add('show');
+  try{
+    const result=await Tesseract.recognize(src,OCR_LANGS[getFrom()]||'eng',{
+      logger:m=>{if(m.status==='recognizing text'){$('progFill').style.width=Math.round(m.progress*100)+'%';$('statusTxt').textContent=`Aniqlanmoqda ${Math.round(m.progress*100)}%...`;}}
+    });
+    $('progWrap').classList.remove('show');$('statusTxt').textContent='';
+    processText(result.data.text);
+  }catch(e){$('progWrap').classList.remove('show');showToast('❌ Xatolik. Qaytadan urinib ko\'ring.');}
+}
+
+// ===== PROCESS TEXT =====
+function processText(raw){
+  const ws=raw.split(/[\s\n]+/)
+    .map(w=>w.replace(/[^a-zA-Zа-яА-ЯёЁʻʼ''\-]/g,'').replace(/^['\-]+|['\-]+$/g,'').trim())
+    .filter(w=>w.length>1&&/[a-zA-Zа-яА-ЯёЁ]{2,}/.test(w));
+  let unique=[...new Set(ws.map(w=>w.toLowerCase()))];
+  if(S.filter){
+    const before=unique.length;
+    unique=unique.filter(w=>!S.seenWords.has(w));
+    const skipped=before-unique.length;
+    if(skipped>0)showToast(`🔄 ${skipped} ta so'z o'tkazib yuborildi`);
+  }
+  if(!unique.length){showToast('⚠️ So\'z topilmadi');return;}
+  $('wordList').innerHTML='';$('listPanel').classList.add('show');
+  $('wCount').textContent=unique.length+' ta';
+  unique.forEach(w=>addWordRow(w));
+  unique.forEach(w=>S.seenWords.add(w));
+}
+
+// ===== LEVEL =====
+function getLevel(w){
+  const l=w.length;
+  if(l<=4)return'A1';if(l<=6)return'A2';if(l<=8)return'B1';if(l<=10)return'B2';return'C1';
+}
+
+// ===== WORD ROW =====
+function addWordRow(word){
+  const base=stripSuf(word);
+  const wrap=document.createElement('div');wrap.className='wr-wrap';
+  const infoBox=document.createElement('div');infoBox.className='info-box';
+
+  const row=document.createElement('div');row.className='wr';
+  const pair=document.createElement('div');pair.className='wr-pair';
+  const orig=document.createElement('div');orig.className='wr-orig';orig.textContent=base;
+  const dash=document.createElement('span');dash.className='wr-dash';dash.textContent='—';
+  const trans=document.createElement('div');trans.className='wr-trans loading';trans.textContent='...';
+  pair.appendChild(orig);pair.appendChild(dash);pair.appendChild(trans);
+
+  const lvl=document.createElement('span');
+  const lv=getLevel(base);lvl.className='wr-level lvl-'+lv;lvl.textContent=lv;
+
+  const learned=document.createElement('button');learned.className='wr-learned';learned.textContent='';
+  learned.title='O\'rgandim';
+  learned.addEventListener('click',()=>{
+    const done=!learned.classList.contains('done');
+    learned.classList.toggle('done',done);
+    learned.textContent=done?'✓':'';
+    showToast(done?'✅ O\'rgandim!':'Bekor qilindi');haptic(done?30:15);
+  });
+
+  const infoBtn=mkBtn('ic-btn info','ℹ');
+  let infoLoaded=false;
+  infoBtn.addEventListener('click',()=>{
+    infoBox.classList.toggle('show');
+    if(infoBox.classList.contains('show')&&!infoLoaded&&getFrom()==='en'){
+      infoLoaded=true;infoBox.innerHTML='<div style="font-size:12px;color:var(--gray)">Yuklanmoqda...</div>';
+      fetchDict(base,infoBox);
+    }
+    haptic(15);
+  });
+
+  const ttsBtn=mkBtn('ic-btn tts','🔊');
+  ttsBtn.addEventListener('click',()=>{speak(base,getFrom());showToast('🔊 '+base);haptic(15);});
+
+  const copyBtn=mkBtn('ic-btn copy','📋');
+  copyBtn.addEventListener('click',()=>{
+    const t=trans.textContent;
+    if(!t||t==='...'||t==='tarjima topilmadi')return;
+    copyText(t);copyBtn.textContent='✓';copyBtn.classList.add('ok');
+    showToast('✅ Nusxalandi');haptic(20);
+    setTimeout(()=>{copyBtn.textContent='📋';copyBtn.classList.remove('ok');},1500);
+  });
+
+  const shareWordBtn=mkBtn('ic-btn','📤');
+  shareWordBtn.style.cssText='background:var(--orange-l);color:var(--orange);';
+  shareWordBtn.addEventListener('click',()=>{
+    const t=trans.textContent;
+    const txt=`${base} — ${t}`;
+    if(navigator.share)navigator.share({title:'So\'z',text:txt}).catch(()=>{});
+    else{copyText(txt);showToast('📋 Nusxalandi');}
+    haptic(20);
+  });
+
+  const delBtn=mkBtn('ic-btn del','❎');
+  delBtn.addEventListener('click',()=>{
+    wrap.remove();
+    const rem=$('wordList').querySelectorAll('.wr-wrap').length;
+    $('wCount').textContent=rem+' ta';
+    if(!rem)$('listPanel').classList.remove('show');
+    showToast('🗑 O\'chirildi');haptic(20);
+  });
+
+  row.appendChild(pair);row.appendChild(lvl);row.appendChild(learned);
+  row.appendChild(infoBtn);row.appendChild(ttsBtn);row.appendChild(copyBtn);row.appendChild(shareWordBtn);row.appendChild(delBtn);
+  wrap.appendChild(row);wrap.appendChild(infoBox);
+  $('wordList').appendChild(wrap);
+  translateWord(base,trans);
+}
+
+// ===== TRANSLATE API =====
+function decH(s){const t=document.createElement('textarea');t.innerHTML=s;return t.value;}
+function cleanT(s){if(!s)return'';return decH(s).replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();}
+function pickBest(data,word){
+  const c=[];
+  if(data.responseData?.translatedText)c.push({t:cleanT(data.responseData.translatedText),s:parseFloat(data.responseData.match)||0.5});
+  (data.matches||[]).forEach(m=>{if(m.translation)c.push({t:cleanT(m.translation),s:parseFloat(m.match)||0});});
+  const v=c.filter(x=>x.t&&x.t.length<80&&!x.t.includes('<')&&x.t.toLowerCase()!==word.toLowerCase());
+  if(!v.length)return null;v.sort((a,b)=>b.s-a.s);return v[0].t;
+}
+async function translateWord(word,el){
+  try{
+    const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=${getFrom()}|${getTo()}`);
+    const d=await res.json();const b=pickBest(d,word);
+    el.textContent=b||'tarjima topilmadi';el.classList.remove('loading');
+  }catch(e){el.textContent='xatolik';el.classList.remove('loading');}
+}
+async function transToUz(text){
+  try{
+    const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|uz`);
+    const d=await res.json();return cleanT(d?.responseData?.translatedText||'')||text;
+  }catch(e){return text;}
+}
+
+// ===== DICTIONARY =====
+const POS={'noun':'Ot','verb':"Fe'l",'adjective':'Sifat','adverb':'Ravish','pronoun':'Olmosh','preposition':"Ko'makchi",'conjunction':"Bog'lovchi",'interjection':"Undov so'z",'exclamation':"Undov so'z",'determiner':'Aniqlovchi'};
+async function fetchDict(word,box){
+  try{
+    const res=await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+    if(!res.ok){box.innerHTML='<div style="font-size:12px;color:var(--gray)">Lug\'atda topilmadi.</div>';return;}
+    const data=await res.json();
+    box.innerHTML='<div style="font-size:12px;color:var(--gray)">Tarjima qilinmoqda...</div>';
+    const entries=[];let cnt=0;
+    const syns=[],exs=[];
+    data.forEach(e=>e.meanings.forEach(m=>{
+      m.definitions.slice(0,2).forEach(d=>{
+        if(cnt++<4)entries.push({pos:m.partOfSpeech,def:d.definition,ex:d.example||''});
+      });
+      (m.synonyms||[]).slice(0,3).forEach(s=>syns.push(s));
+      (m.antonyms||[]).slice(0,2).forEach(a=>exs.push('↔ '+a));
+    }));
+    const trs=await Promise.all(entries.map(e=>transToUz(e.def)));
+    box.innerHTML='';
+    entries.forEach((e,i)=>{
+      const badge=document.createElement('span');badge.className='pos-tag';badge.textContent=POS[e.pos]||e.pos;box.appendChild(badge);
+      const d=document.createElement('div');d.className='def-row';d.textContent=trs[i]||e.def;box.appendChild(d);
+      if(e.ex){const ex=document.createElement('div');ex.className='ex-row';ex.textContent='"'+e.ex+'"';box.appendChild(ex);}
+    });
+    if(syns.length){const s=document.createElement('div');s.className='syn-row';s.textContent='🔗 Sinonimlar: '+syns.join(', ');box.appendChild(s);}
+    if(exs.length){const a=document.createElement('div');a.className='syn-row';a.textContent='↔ Antonimlar: '+exs.map(x=>x.replace('↔ ','')).join(', ');box.appendChild(a);}
+  }catch(e){box.innerHTML='<div style="font-size:12px;color:var(--gray)">Yuklanmadi.</div>';}
+}
+
+// ===== SAVE =====
+$('saveBtn').addEventListener('click',()=>{
+  if(!$('wordList').querySelectorAll('.wr-wrap').length){showToast('⚠️ Saqlash uchun so\'zlar yo\'q');return;}
+  $('saveNameIn').value='';$('saveModal').classList.add('show');
+  setTimeout(()=>$('saveNameIn').focus(),100);haptic();
+});
+$('saveCancelBtn').addEventListener('click',()=>{$('saveModal').classList.remove('show');haptic();});
+$('saveConfBtn').addEventListener('click',()=>{
+  const rows=$('wordList').querySelectorAll('.wr-wrap');if(!rows.length)return;
+  const words=[];
+  rows.forEach(r=>{const w=r.querySelector('.wr-orig')?.textContent,t=r.querySelector('.wr-trans')?.textContent;if(w&&t)words.push({word:w,translation:t});});
+  const name=$('saveNameIn').value.trim()||"Nomsiz to'plam";
+  const now=new Date();
+  const date=now.toLocaleDateString('uz-UZ',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+now.toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'});
+  lset('saved:'+now.getTime(),JSON.stringify({name,date,words}));
+  $('saveModal').classList.remove('show');
+  showToast('✅ To\'plam saqlandi!');haptic(30);
+});
+
+// ===== NAV =====
+$('navSaved').addEventListener('click',()=>{haptic();renderSaved();show('savedScreen');});
+$('navStats').addEventListener('click',()=>{haptic();renderStats();show('statsScreen');});
+$('navHistory').addEventListener('click',()=>{haptic();renderHist();show('histScreen');});
+$('navSettings').addEventListener('click',()=>{haptic();show('settScreen');});
+$('savedBack').addEventListener('click',()=>{haptic();hide('savedScreen');});
+$('statsBack').addEventListener('click',()=>{haptic();hide('statsScreen');});
+$('histBack').addEventListener('click',()=>{haptic();hide('histScreen');});
+$('settBack').addEventListener('click',()=>{haptic();hide('settScreen');});
+$('detailBack').addEventListener('click',()=>{haptic();hide('detailScreen');});
+$('fcBack').addEventListener('click',()=>{haptic();hide('fcScreen');});
+$('qzBack').addEventListener('click',()=>{haptic();hide('qzScreen');});
+
+// ===== SAVED SCREEN =====
+$('searchIn').addEventListener('input',()=>renderSaved($('searchIn').value));
+function renderSaved(q=''){
+  const el=$('savedList');
+  const keys=lkeys('saved:');
+  const items=keys.map(k=>{try{return{key:k,...JSON.parse(lget(k))};}catch(e){return null;}}).filter(Boolean).sort((a,b)=>b.key.localeCompare(a.key));
+  const list=q?items.filter(i=>i.name.toLowerCase().includes(q.toLowerCase())):items;
+  if(!list.length){el.innerHTML='<div style="text-align:center;color:var(--gray);padding:40px 0;font-size:14px;">📭 Hozircha hech narsa saqlanmagan</div>';return;}
+  el.innerHTML='';
+  list.forEach(item=>{
+    const wrap=document.createElement('div');wrap.className='si';
+    const head=document.createElement('div');head.className='si-head';
+    const info=document.createElement('div');info.className='si-info';
+    const nm=document.createElement('div');nm.className='si-name';nm.textContent=item.name;
+    const mt=document.createElement('div');mt.className='si-meta';mt.textContent=`📅 ${item.date} • ${item.words.length} ta so'z`;
+    info.appendChild(nm);info.appendChild(mt);
+    const del=mkBtn('ic-btn del','🗑️');del.style.cssText='width:30px;height:30px;font-size:14px;';
+    del.addEventListener('click',e=>{e.stopPropagation();ldel(item.key);wrap.remove();showToast('🗑 O\'chirildi');haptic(20);
+      if(!$('savedList').children.length)$('savedList').innerHTML='<div style="text-align:center;color:var(--gray);padding:40px 0;font-size:14px;">📭 Hozircha hech narsa saqlanmagan</div>';
+    });
+    head.addEventListener('click',()=>{haptic();openDetail(item);});
+    head.appendChild(info);head.appendChild(del);wrap.appendChild(head);el.appendChild(wrap);
+  });
+}
+
+// ===== DETAIL SCREEN =====
+function openDetail(item){
+  S.currentItem={...item,words:[...item.words]};
+  $('detailTitle').textContent=item.name;
+  renderDetailWords();show('detailScreen');
+}
+function renderDetailWords(){
+  const box=$('detailWords');box.innerHTML='';
+  if(!S.currentItem.words.length){box.innerHTML='<div style="text-align:center;color:var(--gray);padding:30px;font-size:13px">So\'zlar yo\'q.</div>';return;}
+  $('detailMeta').textContent=`📅 ${S.currentItem.date} • ${S.currentItem.words.length} ta so'z`;
+  S.currentItem.words.forEach((w,i)=>{
+    const wrap=document.createElement('div');wrap.className='dw';
+    const infoB=document.createElement('div');infoB.className='info-box';
+    const row=document.createElement('div');row.className='dw-row';
+    const orig=document.createElement('span');orig.className='dw-orig';orig.textContent=w.word;
+    const dash=document.createElement('span');dash.className='dw-dash';dash.textContent='—';
+    const trans=document.createElement('span');trans.className='dw-trans';trans.textContent=w.translation;
+
+    const infoBtn=mkBtn('ic-btn info','ℹ');let loaded=false;
+    infoBtn.addEventListener('click',()=>{
+      infoB.classList.toggle('show');
+      if(infoB.classList.contains('show')&&!loaded){loaded=true;infoB.innerHTML='<div style="font-size:12px;color:var(--gray)">Yuklanmoqda...</div>';fetchDict(w.word,infoB);}
+      haptic(15);
+    });
+    const ttsB=mkBtn('ic-btn tts','🔊');ttsB.addEventListener('click',()=>{speak(w.word);haptic(15);});
+    const copyB=mkBtn('ic-btn copy','📋');copyB.addEventListener('click',()=>{copyText(w.translation);showToast('✅ Nusxalandi');haptic(20);});
+    const delB=mkBtn('ic-btn del','❎');
+    delB.addEventListener('click',()=>{
+      S.currentItem.words.splice(i,1);
+      lset(S.currentItem.key,JSON.stringify({name:S.currentItem.name,date:S.currentItem.date,words:S.currentItem.words}));
+      renderDetailWords();showToast('🗑 O\'chirildi');haptic(20);
+    });
+    row.appendChild(orig);row.appendChild(dash);row.appendChild(trans);row.appendChild(infoBtn);row.appendChild(ttsB);row.appendChild(copyB);row.appendChild(delB);
+    wrap.appendChild(row);wrap.appendChild(infoB);box.appendChild(wrap);
+  });
+}
+$('shareBtn').addEventListener('click',()=>{
+  if(!S.currentItem)return;
+  const text=S.currentItem.words.map(w=>`${w.word} — ${w.translation}`).join('\n');
+  if(navigator.share)navigator.share({title:S.currentItem.name,text:`${S.currentItem.name}\n\n${text}`}).catch(()=>{});
+  else{copyText(text);showToast('📋 To\'plam nusxalandi');}
+  haptic(20);
+});
+
+// ===== STATS =====
+function renderStats(){
+  const keys=lkeys('saved:');
+  const items=keys.map(k=>{try{return JSON.parse(lget(k));}catch(e){return null;}}).filter(Boolean);
+  const total=items.reduce((s,i)=>s+i.words.length,0);
+  const best=items.sort((a,b)=>b.words.length-a.words.length)[0];
+  const avg=items.length?Math.round(total/items.length):0;
+  $('statsBody').innerHTML=`
+    <div class="stats-grid">
+      <div class="sk stat-card"><div class="stat-n">${items.length}</div><div class="stat-l">📁 To'plamlar</div></div>
+      <div class="sk stat-card"><div class="stat-n">${total}</div><div class="stat-l">📚 Jami so'zlar</div></div>
+      <div class="sk stat-card"><div class="stat-n">${avg}</div><div class="stat-l">📊 O'rtacha</div></div>
+      <div class="sk stat-card"><div class="stat-n">${S.seenWords.size}</div><div class="stat-l">👁 Bu seansd</div></div>
+    </div>
+    ${best?`<div class="sk" style="padding:16px;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🏆 Eng katta to'plam</div>
+      <div style="font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--green)">${best.name}</div>
+      <div style="font-size:13px;color:var(--gray);margin-top:4px;">${best.words.length} ta so'z</div>
+    </div>`:''}`;
+}
+
+// ===== HISTORY =====
+function renderHist(){
+  const h=JSON.parse(lget('history')||'[]');
+  const box=$('histList');
+  if(!h.length){box.innerHTML='<div style="text-align:center;color:var(--gray);padding:30px;font-size:13px">📭 Tarix bo\'sh</div>';return;}
+  box.innerHTML='';
+  h.forEach(t=>{
+    const item=document.createElement('div');item.className='hist-item';
+    const txt=document.createElement('div');txt.className='hist-text';txt.textContent=t;
+    item.appendChild(txt);
+    item.addEventListener('click',()=>{$('pasteText').value=t;hide('histScreen');showToast('📝 Matn joylashtirildi');haptic(20);});
+    box.appendChild(item);
+  });
+}
+$('histClear').addEventListener('click',()=>{lset('history','[]');renderHist();showToast('🗑 Tarix tozalandi');haptic(20);});
+
+// ===== SETTINGS BINDS =====
+bindToggle('darkToggle','dark',v=>{applyDark();showToast(v?'🌙 Tungi rejim yoqildi':'☀️ Kunduz rejimi');});
+bindToggle('filterToggle','filter',v=>{$('filterBtn').style.background=v?'var(--orange)':'';$('filterBtn').style.color=v?'#fff':'';showToast(v?'🔄 Filtr yoqildi':'Filtr o\'chirildi');});
+bindToggle('autoToggle','auto',v=>showToast(v?'⚡ Avto-tarjima yoqildi':'Avto-tarjima o\'chirildi'));
+bindToggle('stripToggle','strip',v=>{$('stripBtn').style.background=v?'var(--orange)':'';$('stripBtn').style.color=v?'#fff':'';showToast(v?'✂️ Qo\'shimchasiz yoqildi':'Oddiy rejim');});
+bindToggle('hapticToggle','haptic',v=>showToast(v?'📳 Tebranish yoqildi':'Tebranish o\'chirildi'));
+
+// ===== FLASHCARD =====
+$('fcStartBtn').addEventListener('click',()=>{
+  if(!S.currentItem?.words?.length){showToast('⚠️ So\'zlar yo\'q');return;}
+  S.fcWords=[...S.currentItem.words].sort(()=>Math.random()-0.5);S.fcIdx=0;
+  renderFC();show('fcScreen');haptic();
+});
+$('fcBack').addEventListener('click',()=>{haptic();hide('fcScreen');});
+$('fcCard').addEventListener('click',()=>{$('fcCard').classList.toggle('flipped');haptic(15);});
+$('fcPrev').addEventListener('click',()=>{if(S.fcIdx>0){S.fcIdx--;$('fcCard').classList.remove('flipped');renderFC();haptic();}});
+$('fcNext').addEventListener('click',()=>{if(S.fcIdx<S.fcWords.length-1){S.fcIdx++;$('fcCard').classList.remove('flipped');renderFC();haptic();}});
+function renderFC(){
+  const w=S.fcWords[S.fcIdx];
+  $('fcFront').textContent=w.word;$('fcBack').textContent=w.translation;
+  $('fcProg').textContent=`${S.fcIdx+1}/${S.fcWords.length}`;
+  $('fcPrev').disabled=S.fcIdx===0;$('fcNext').disabled=S.fcIdx===S.fcWords.length-1;
+}
+
+// ===== QUIZ =====
+$('qzStartBtn').addEventListener('click',()=>{
+  if(!S.currentItem?.words||S.currentItem.words.length<4){showToast('⚠️ Test uchun kamida 4 ta so\'z kerak');return;}
+  S.qzWords=[...S.currentItem.words].sort(()=>Math.random()-0.5);
+  S.qzIdx=0;S.qzScore=0;S.qzDone=false;
+  renderQZ();show('qzScreen');haptic();
+});
+$('qzBack').addEventListener('click',()=>{haptic();hide('qzScreen');});
+function renderQZ(){
+  const body=$('qzBody');
+  if(S.qzIdx>=S.qzWords.length){
+    const pct=Math.round(S.qzScore/S.qzWords.length*100);
+    body.innerHTML=`<div class="qz-score-wrap">
+      <div style="font-size:40px;">🏆</div>
+      <div class="qz-score-n">${S.qzScore}/${S.qzWords.length}</div>
+      <div style="color:var(--gray);font-size:14px;">${pct}% to'g'ri javob</div>
+      <div style="margin-top:12px;font-size:13px;color:var(--orange);">${pct>=80?'🌟 Ajoyib!':pct>=60?'👍 Yaxshi!':'📚 Davom eting!'}</div>
+      <button class="sk-btn primary qz-restart" style="padding:12px 30px;font-size:14px;margin-top:20px;">🔄 Qaytadan</button>
+    </div>`;
+    $('qzHdr').textContent='';
+    body.querySelector('.qz-restart').addEventListener('click',()=>{
+      S.qzWords=[...S.currentItem.words].sort(()=>Math.random()-0.5);S.qzIdx=0;S.qzScore=0;renderQZ();haptic();
+    });
+    return;
+  }
+  $('qzHdr').textContent=`${S.qzScore}/${S.qzIdx}`;
+  const cur=S.qzWords[S.qzIdx];
+  const wrong=S.qzWords.filter((_,i)=>i!==S.qzIdx).sort(()=>Math.random()-0.5).slice(0,3);
+  const opts=[...wrong,cur].sort(()=>Math.random()-0.5);
+  body.innerHTML=`<div class="qz-q"><div class="qz-word">${cur.word}</div><div class="qz-sub">To'g'ri tarjimani tanlang</div></div>
+    <div class="qz-opts">${opts.map(o=>`<button class="qz-opt sk-btn" data-v="${o.translation}">${o.translation}</button>`).join('')}</div>`;
+  let answered=false;
+  body.querySelectorAll('.qz-opt').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(answered)return;answered=true;
+      const ok=btn.dataset.v===cur.translation;
+      if(ok){S.qzScore++;btn.classList.add('ok');showToast('✅ To\'g\'ri!');haptic(30);}
+      else{btn.classList.add('ng');body.querySelectorAll('.qz-opt').forEach(b=>{if(b.dataset.v===cur.translation)b.classList.add('ok');});showToast('❌ Noto\'g\'ri');haptic([50,30]);}
+      setTimeout(()=>{S.qzIdx++;renderQZ();},1200);
+    });
+  });
+}
+
+// ===== ONBOARDING =====
+let obIdx=0;
+function setOb(i){
+  obIdx=i;
+  $('obSlides').style.transform=`translateX(-${i*100}%)`;
+  $('obSlides').style.transition='transform 0.35s';
+  document.querySelectorAll('.ob-dot').forEach((d,j)=>d.classList.toggle('active',j===i));
+  $('obNext').textContent=i===2?'🚀 Boshlash':'Keyingi →';
+}
+$('obNext').addEventListener('click',()=>{
+  if(obIdx<2)setOb(obIdx+1);
+  else{lset('onboarded','1');hide('onboardScreen');show('homeScreen');}
+  haptic();
+});
+$('obSkip').addEventListener('click',()=>{lset('onboarded','1');hide('onboardScreen');show('homeScreen');haptic();});
+
+// ===== WOTD =====
+function loadWOTD(){
+  const day=Math.floor(Date.now()/86400000)%WOTD.length;
+  const w=WOTD[day];
+  $('wotdWord').textContent=w.w;
+  $('wotdTrans').textContent=w.t+' ('+w.l+')';
+  $('wotdTts').addEventListener('click',()=>{speak(w.w,'en');showToast('🔊 '+w.w);haptic(15);});
+}
+
+// ===== INIT =====
+function init(){
+  // Splash
+  show('splashScreen');
+  setTimeout(()=>{
+    hide('splashScreen');
+    if(lget('onboarded')){loadSettings();loadWOTD();show('homeScreen');}
+    else{show('onboardScreen');}
+  },2000);
+  loadSettings();loadWOTD();
+}
+init();
+</script>
+</body>
+</html>
