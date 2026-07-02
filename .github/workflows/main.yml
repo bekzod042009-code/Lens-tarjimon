@@ -22,13 +22,21 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install dependencies
+      - name: Prepare web folder
+        run: |
+          mkdir -p www
+          cp index.html www/
+          cp manifest.json www/
+          cp icon-192.png www/
+          cp icon-512.png www/
+
+      - name: Install Capacitor
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Init Capacitor
         run: |
-          npx cap init "Lens Tarjimon" "com.usmonjonov.lenstarjimon" --web-dir .
+          npx cap init "Lens Tarjimon" "com.usmonjonov.lenstarjimon" --web-dir www
 
       - name: Add Android platform
         run: |
@@ -49,4 +57,3 @@ jobs:
         with:
           name: Lens-Tarjimon-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          
